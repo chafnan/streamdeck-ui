@@ -15,6 +15,7 @@ from StreamDeck import DeviceManager
 from StreamDeck.Devices import StreamDeck
 from StreamDeck.ImageHelpers import PILHelper
 
+import streamdeck_ui.api
 from streamdeck_ui.config import CONFIG_FILE_VERSION, DEFAULT_FONT, FONTS_PATH, STATE_FILE
 
 image_cache: Dict[str, memoryview] = {}
@@ -40,6 +41,7 @@ class DataModel:
     targetDevice = ""
     brightness = ""
     writeText = ""
+    fontSize = 14
 
 
 paste_cache: Dict[str, str] = {}
@@ -200,6 +202,19 @@ def get_button_text(deck_id: str, page: int, button: int) -> str:
     return _button_state(deck_id, page, button).get("text", "")
 
 
+def set_font_size(deck_id: str, page: int, button: int, value: int) -> None:
+    if get_font_size(deck_id, page, button) != value:
+        _button_state(deck_id, page, button)["font_size"] = value
+        image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        render()
+        _save_state()
+
+
+def get_font_size(deck_id: str, page: int, button: int) -> int:
+    """Returns the font size set for the specified button"""
+    return _button_state(deck_id, page, button).get("font_size", 14)
+
+
 def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
     """Sets the icon associated with a button"""
     if get_button_icon(deck_id, page, button) != icon:
@@ -337,6 +352,7 @@ def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
 
     paste_cache = DataModel
     paste_cache.text = get_button_text(deck_id, page, button)
+    paste_cache.fontSize = get_font_size(deck_id, page, button)
     paste_cache.image = get_button_icon(deck_id, page, button)
     paste_cache.command = get_button_command(deck_id, page, button)
     paste_cache.pressKey = get_button_keys(deck_id, page, button)
@@ -354,6 +370,7 @@ def edit_menu_cut_button(deck_id: str, page: int, button: int) -> None:
 
     paste_cache = DataModel
     paste_cache.text = get_button_text(deck_id, page, button)
+    paste_cache.fontSize = get_font_size(deck_id, page, button)
     paste_cache.image = get_button_icon(deck_id, page, button)
     paste_cache.command = get_button_command(deck_id, page, button)
     paste_cache.pressKey = get_button_keys(deck_id, page, button)
@@ -422,14 +439,20 @@ def render() -> None:
             if key in image_cache:
                 image = image_cache[key]
             else:
-                image = _render_key_image(deck, **button_settings)
+                image = _render_key_image(
+                    deck,
+                    streamdeck_ui.api.get_font_size(deck_id, page, button_id),
+                    **button_settings,
+                )
                 image_cache[key] = image
 
             with streamdecks_lock:
                 deck.set_key_image(button_id, image)
 
 
-def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs):
+def _render_key_image(
+    deck, fontSize: int, icon: str = "", text: str = "", font: str = DEFAULT_FONT, **kwargs
+):
     """Renders an individual key image"""
     image = PILHelper.create_image(deck)
     draw = ImageDraw.Draw(image)
@@ -452,7 +475,7 @@ def _render_key_image(deck, icon: str = "", text: str = "", font: str = DEFAULT_
     image.paste(rgba_icon, icon_pos, rgba_icon)
 
     if text:
-        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), 14)
+        true_font = ImageFont.truetype(os.path.join(FONTS_PATH, font), fontSize)
         label_w, label_h = draw.textsize(text, font=true_font)
         if icon:
             label_pos = ((image.width - label_w) // 2, image.height - 20)
