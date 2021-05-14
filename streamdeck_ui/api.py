@@ -43,6 +43,7 @@ class DataModel:
     writeText = ""
     fontSize = 14
     fontColor = "white"
+    textAlign = "center"
 
 
 paste_cache: Dict[str, str] = {}
@@ -216,6 +217,19 @@ def get_font_size(deck_id: str, page: int, button: int) -> int:
     return _button_state(deck_id, page, button).get("font_size", 14)
 
 
+def set_text_align(deck_id: str, page: int, button: int, value: int) -> None:
+    if get_font_size(deck_id, page, button) != value:
+        _button_state(deck_id, page, button)["text_align"] = value
+        image_cache.pop(f"{deck_id}.{page}.{button}", None)
+        render()
+        _save_state()
+
+
+def get_text_align(deck_id: str, page: int, button: int) -> int:
+    """Returns the font size set for the specified button"""
+    return _button_state(deck_id, page, button).get("text_align", "center")
+
+
 def set_font_color(deck_id: str, page: int, button: int, value: str) -> None:
     if get_font_color(deck_id, page, button) != value:
         _button_state(deck_id, page, button)["font_color"] = value
@@ -359,6 +373,7 @@ def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
     set_button_change_brightness(deck_id, page, button, 0)
     set_button_icon(deck_id, page, button, "")
     set_target_device(deck_id, page, button, "")
+    set_text_align(deck_id,page,button, "center")
     render()
     _save_state()
 
@@ -376,6 +391,7 @@ def createCopyOrPasteItem(deck_id: str, page: int, button: int):
     paste_cache.targetDevice = get_target_device(deck_id, page, button)
     paste_cache.brightness = get_button_change_brightness(deck_id, page, button)
     paste_cache.writeText = get_button_write(deck_id, page, button)
+    paste_cache.textAlign = get_text_align(deck_id, page, button)
 
 
 def edit_menu_copy_button(deck_id: str, page: int, button: int) -> None:
@@ -412,6 +428,9 @@ def edit_menu_paste_button(deck_id: str, page: int, button: int, multiPaste: boo
         set_target_device(deck_id, page, button, paste_cache.targetDevice)
         set_button_change_brightness(deck_id, page, button, paste_cache.brightness)
         set_button_write(deck_id, page, button, paste_cache.writeText)
+        set_text_align(deck_id, page,button, paste_cache.textAlign)
+        set_font_size(deck_id,page, button, paste_cache.fontSize)
+        set_font_color(deck_id, page, button, paste_cache.fontColor)
 
         if not multiPaste:
             paste_cache = {}
@@ -447,6 +466,7 @@ def render() -> None:
             else:
                 image = _render_key_image(
                     deck,
+                    streamdeck_ui.api.get_text_align(deck_id, page, button_id),
                     streamdeck_ui.api.get_font_size(deck_id, page, button_id),
                     streamdeck_ui.api.get_font_color(deck_id, page, button_id),
                     **button_settings,
@@ -459,6 +479,7 @@ def render() -> None:
 
 def _render_key_image(
     deck,
+    textAlign: str,
     fontSize: int,
     fontColor: str,
     icon: str = "",
@@ -495,7 +516,7 @@ def _render_key_image(
             label_pos = ((image.width - label_w) // 2, image.height - 20)
         else:
             label_pos = ((image.width - label_w) // 2, (image.height // 2) - 7)
-        draw.text(label_pos, text=text, font=true_font, fill=fontColor)
+        draw.text(label_pos, align=textAlign, text=text, font=true_font, fill=fontColor)
 
     return PILHelper.to_native_format(deck, image)
 
