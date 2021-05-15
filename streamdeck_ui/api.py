@@ -61,10 +61,8 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
     with key_event_lock:
         if get_feedback_enabled(deck_id) == "Enabled":
             holder = get_button_icon(deck_id, get_page(deck_id), key)
-            set_button_icon(deck_id, get_page(deck_id), key, get_custom_image_for_feedback(deck_id))
-            render()
-            set_button_icon(deck_id, get_page(deck_id), key, holder)
-            render()
+            set_temp_button_icon(deck_id, get_page(deck_id), key, get_custom_image_for_feedback(deck_id))
+
 
         streamdesk_keys.key_pressed.emit(deck_id, key, state)
 
@@ -272,6 +270,20 @@ def set_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
         image_cache.pop(f"{deck_id}.{page}.{button}", None)
         render()
         _save_state()
+
+
+def set_temp_button_icon(deck_id: str, page: int, button: int, icon: str) -> None:
+    originalDeck_id = deck_id
+    originalPage = page
+    originalButton = button
+    originalHolder = get_button_icon(originalDeck_id, originalPage, originalButton)
+    _button_state(originalDeck_id, originalPage, originalButton)["icon"] = icon
+    image_cache.pop(f"{originalDeck_id}.{originalPage}.{originalButton}", None)
+    render()
+    time.sleep(0.25)
+    _button_state(originalDeck_id, originalPage, originalButton)["icon"] = originalHolder
+    image_cache.pop(f"{originalDeck_id}.{originalPage}.{originalButton}", None)
+    render()
 
 
 def get_target_device(deck_id: str, page: int, button: int) -> str:
