@@ -495,7 +495,6 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     button_clicked_action(ui, deck_id, _page(ui), button_id)
 
 
-
 def build_buttons(ui, tab) -> None:
     deck_id = _deck_id(ui)
     deck = api.get_deck(deck_id)
