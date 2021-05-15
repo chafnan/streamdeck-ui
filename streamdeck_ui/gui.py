@@ -4,9 +4,9 @@ import shlex
 import sys
 import time
 import tkinter as tk
-from tkinter import filedialog
 from functools import partial
 from subprocess import Popen  # nosec - Need to allow users to specify arbitrary commands
+from tkinter import filedialog
 from typing import Callable, Dict
 
 from pynput.keyboard import Controller, Key
@@ -393,7 +393,9 @@ def select_image(window) -> None:
     root = tk.Tk()
     root.withdraw()
 
-    file_name = filedialog.askopenfilename(initialdir=os.path.dirname(api.get_last_known_folder(deck_id)))
+    file_name = filedialog.askopenfilename(
+        initialdir=os.path.dirname(api.get_last_known_folder(deck_id))
+    )
 
     # file_name = QFileDialog.getOpenFileName(
     #     window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.gif)"
@@ -413,7 +415,9 @@ def select_image_for_custom_feedback(window) -> None:
     root = tk.Tk()
     root.withdraw()
 
-    file_name = filedialog.askopenfilename(initialdir=os.path.dirname(api.get_last_known_folder(deck_id)))
+    file_name = filedialog.askopenfilename(
+        initialdir=os.path.dirname(api.get_last_known_folder(deck_id))
+    )
 
     # file_name = QFileDialog.getOpenFileName(
     #     window, "Open Image", image, "Image Files (*.png *.jpg *.bmp *.gif)"
@@ -541,7 +545,9 @@ def import_config(window) -> None:
     root = tk.Tk()
     root.withdraw()
 
-    file_name = filedialog.askopenfilename(initialdir=os.path.dirname(api.get_last_known_import_folder(deck_id)))
+    file_name = filedialog.askopenfilename(
+        initialdir=os.path.dirname(api.get_last_known_import_folder(deck_id))
+    )
 
     # file_name = QFileDialog.getOpenFileName(
     #     window, "Import Config", valueLocation, "Config Files (*.json)"
