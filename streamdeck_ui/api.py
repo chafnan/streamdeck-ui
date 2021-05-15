@@ -61,8 +61,9 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
     with key_event_lock:
         if get_feedback_enabled(deck_id) == "Enabled":
             holder = get_button_icon(deck_id, get_page(deck_id), key)
-            set_temp_button_icon(deck_id, get_page(deck_id), key, get_custom_image_for_feedback(deck_id))
-
+            set_temp_button_icon(
+                deck_id, get_page(deck_id), key, get_custom_image_for_feedback(deck_id)
+            )
 
         streamdesk_keys.key_pressed.emit(deck_id, key, state)
 
@@ -474,6 +475,7 @@ def edit_menu_delete_button(deck_id: str, page: int, button: int) -> None:
         set_target_device(deck_id, page, button, "")
         set_text_align(deck_id, page, button, "center")
         set_selected_font(deck_id, page, button, "Open_Sans")
+
         render()
         _save_state()
 

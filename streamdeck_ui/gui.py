@@ -461,18 +461,7 @@ def set_brightness(ui, value: int) -> None:
     dimmers[deck_id].reset()
 
 
-def button_clicked(ui, clicked_button, buttons) -> None:
-    global selected_button
-    selected_button = clicked_button
-
-    for button in buttons:
-        if button == clicked_button:
-            continue
-
-        button.setChecked(False)
-
-    selected_button.setFocus()
-
+def button_clicked_action(ui: str, deck_id: str, page: int, button: int):
     deck_id = _deck_id(ui)
     button_id = selected_button.index
     ui.text.setText(api.get_button_text(deck_id, _page(ui), button_id))
@@ -487,6 +476,24 @@ def button_clicked(ui, clicked_button, buttons) -> None:
     ui.target_device.setCurrentText(api.get_target_device(deck_id, _page(ui), button_id))
     ui.selected_font.setCurrentText(api.get_selected_font(deck_id, _page(ui), button_id))
     dimmers[deck_id].reset()
+
+
+def button_clicked(ui, clicked_button, buttons) -> None:
+    global selected_button
+    selected_button = clicked_button
+
+    for button in buttons:
+        if button == clicked_button:
+            continue
+
+        button.setChecked(False)
+
+    selected_button.setFocus()
+
+    deck_id = _deck_id(ui)
+    button_id = selected_button.index
+    button_clicked_action(ui, deck_id, _page(ui), button_id)
+
 
 
 def build_buttons(ui, tab) -> None:
@@ -564,7 +571,7 @@ def cut_button(window) -> None:
     deck_id = _deck_id(window.ui)
     api.edit_menu_cut_button(deck_id, _page(window.ui), selected_button.index)
     redraw_buttons(window.ui)
-    _highlight_first_button(window.ui)
+    button_clicked_action(window.ui, deck_id, _page(window.ui), selected_button.index)
 
 
 def copy_button(window) -> None:
@@ -579,14 +586,14 @@ def paste_button(window) -> None:
     deck_id = _deck_id(window.ui)
     api.edit_menu_paste_button(deck_id, _page(window.ui), selected_button.index, multiPasteEnabled)
     redraw_buttons(window.ui)
-    _highlight_first_button(window.ui)
+    button_clicked_action(window.ui, deck_id, _page(window.ui), selected_button.index)
 
 
 def delete_button(window) -> None:
     deck_id = _deck_id(window.ui)
     api.edit_menu_delete_button(deck_id, _page(window.ui), selected_button.index)
     redraw_buttons(window.ui)
-    _highlight_first_button(window.ui)
+    button_clicked_action(window.ui, deck_id, _page(window.ui), selected_button.index)
 
 
 def multi_paste_Button(window) -> None:
