@@ -59,12 +59,6 @@ def _key_change_callback(deck_id: str, _deck: StreamDeck.StreamDeck, key: int, s
     # Since multiple keys could fire simultaniously, we need to protect
     # shared state with a lock
     with key_event_lock:
-        if get_feedback_enabled(deck_id) == "Enabled":
-            holder = get_button_icon(deck_id, get_page(deck_id), key)
-            set_temp_button_icon(
-                deck_id, get_page(deck_id), key, get_custom_image_for_feedback(deck_id)
-            )
-
         streamdesk_keys.key_pressed.emit(deck_id, key, state)
 
 

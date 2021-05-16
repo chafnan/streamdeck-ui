@@ -295,6 +295,12 @@ def handle_keypress(deck_id: str, key: int, state: bool) -> None:
         if switch_page:
             api.set_page(target_device, switch_page - 1)
 
+        if api.get_feedback_enabled(deck_id) == "Enabled":
+            holder = api.get_button_icon(deck_id, api.get_page(deck_id), key)
+        api.set_temp_button_icon(
+            deck_id, api.get_page(deck_id), key, api.get_custom_image_for_feedback(deck_id)
+        )
+
 
 def _deck_id(ui) -> str:
     return ui.device_list.itemData(ui.device_list.currentIndex())
